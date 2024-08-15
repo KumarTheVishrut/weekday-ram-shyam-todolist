@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban Board</title>
+    <style>
+        body {
+            background-color: #1e1e1e; /* Dark background */
+            color: #ffffff; /* White text */
+            font-family: Arial, sans-serif;
+        }
+
+        .kanban-board {
+            display: flex;
+            justify-content: center; /* Center the board */
+            gap: 20px; /* Add gap between columns */
+            margin: 20px;
+        }
+
+        .column {
+            flex: 1;
+            margin: 10px;
+            padding: 20px;
+            background-color: #2c2c2c; /* Darker column background */
+            border-radius: 8px; /* Rounded corners */
+        }
+
+        .ticket {
+            margin: 10px 0; /* Margin for tickets */
+            padding: 15px;
+            background-color: #3c3c3c; /* Darker ticket background */
+            border: 1px solid #444; /* Border color */
+            border-radius: 8px; /* Rounded corners */
+        }
+
+        .button {
+            background-color: #4a90e2; /* Button color */
+            color: #ffffff; /* Button text color */
+            border: none; /* No border */
+            border-radius: 5px; /* Rounded corners */
+            padding: 10px 15px; /* Padding for buttons */
+            cursor: pointer; /* Pointer on hover */
+            margin: 5px; /* Margin between buttons */
+            transition: background-color 0.3s; /* Transition for hover effect */
+        }
+
+        .button:hover {
+            background-color: #357ABD; /* Darker blue on hover */
+        }
+
+        h1, h2 {
+            text-align: center; /* Center headers  assets/logo.jpg*/
+        }
+    </style>
+</head>
+<body>
+    <img src="https://cdn.prod.website-files.com/63359abeb97bf0d5ca346052/6336e2cc37e3c15b9c7c4487_Logo_new.png" alt="Logo" style="width: 100px; height: 100px; object-fit: contain; position: absolute; top: 10px; left: 10px;">   
+    <h1>Ram's Kanban Board</h1>
+    <div class="kanban-board">
+        <div class="column">
+            <h2>To Do</h2>
+            {% for _, row in ram_board.iterrows() %}
+            <div class="ticket">
+                <p><strong>Company:</strong> {{ row['Company'] }}</p>
+                <p><strong>Candidate:</strong> {{ row['Candidate'] }}</p>
+                <p><strong>Round:</strong> {{ row['Round'] }}</p>
+                <p>
+                    <form method="POST" action="{{ url_for('send_mail') }}">
+                        <input type="hidden" name="email" value="{{ row['Candidate Email'] }}">
+                        <input type="hidden" name="name" value="{{ row['Candidate'] }}">
+                        <input type="hidden" name="company" value="{{ row['Company'] }}">
+                        <input type="hidden" name="interviewer_email" value="{{ row['Interviewer Email'] }}">
+                        <input type="hidden" name="scheduling_method" value="{{ row['Scheduling method'] }}">
+                        <button type="submit" class="button">Send Mail</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('send_whatsapp') }}">
+                        <input type="hidden" name="phone" value="{{ row['Candidate Phone'] }}">
+                        <input type="hidden" name="message" value="Your message here.">
+                        <button type="submit" class="button">Send WhatsApp</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('reveal_phone') }}">
+                        <input type="hidden" name="phone" value="{{ row['Candidate Phone'] }}">
+                        <button type="submit" class="button">Phone Call</button>
+                    </form>
+                </p>
+                <p><input type="checkbox"> Calendly Invite Accepted</p>
+                <p><strong>Added On:</strong> {{ row['Added On'] }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="column">
+            <h2>Doing</h2>
+            <!-- Similar logic for 'Doing' tickets -->
+        </div>
+        <div class="column">
+            <h2>Done</h2>
+            <!-- Similar logic for 'Done' tickets -->
+        </div>
+    </div>
+
+    <h1>Shyam's Kanban Board</h1>
+    <div class="kanban-board">
+        <div class="column">
+            <h2>To Do</h2>
+            {% for _, row in shyam_board.iterrows() %}
+            <div class="ticket">
+                <p><strong>Company:</strong> {{ row['Company'] }}</p>
+                <p><strong>Candidate:</strong> {{ row['Candidate'] }}</p>
+                <p><strong>Round:</strong> {{ row['Round'] }}</p>
+                <p>
+                    <form method="POST" action="{{ url_for('send_mail') }}">
+                        <input type="hidden" name="email" value="{{ row['Candidate Email'] }}">
+                        <input type="hidden" name="name" value="{{ row['Candidate'] }}">
+                        <input type="hidden" name="company" value="{{ row['Company'] }}">
+                        <input type="hidden" name="interviewer_email" value="{{ row['Interviewer Email'] }}">
+                        <input type="hidden" name="scheduling_method" value="{{ row['Scheduling method'] }}">
+                        <button type="submit" class="button">Send Mail</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('send_whatsapp') }}">
+                        <input type="hidden" name="phone" value="{{ row['Candidate Phone'] }}">
+                        <input type="hidden" name="message" value="Your message here.">
+                        <button type="submit" class="button">Send WhatsApp</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('reveal_phone') }}">
+                        <input type="hidden" name="phone" value="{{ row['Candidate Phone'] }}">
+                        <button type="submit" class="button">Phone Call</button>
+                    </form>
+                </p>
+                <p><input type="checkbox"> Calendly Invite Accepted</p>
+                <p><strong>Added On:</strong> {{ row['Added On'] }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="column">
+            <h2>Doing</h2>
+            <!-- Similar logic for 'Doing' tickets -->
+        </div>
+        <div class="column">
+            <h2>Done</h2>
+            <!-- Similar logic for 'Done' tickets -->
+        </div>
+    </div>
+    <script>
+        const tickets = document.querySelectorAll('.ticket');
+        let draggedTicket = null;
+
+        tickets.forEach(ticket => {
+            ticket.setAttribute('draggable', true);
+
+            ticket.addEventListener('dragstart', () => {
+                draggedTicket = ticket;
+                setTimeout(() => {
+                    ticket.style.display = 'none';
+                }, 0);
+            });
+
+            ticket.addEventListener('dragend', () => {
+                setTimeout(() => {
+                    draggedTicket = null;
+                    ticket.style.display = 'block';
+                }, 0);
+            });
+        });
+
+        const columns = document.querySelectorAll('.column');
+
+        columns.forEach(column => {
+            column.addEventListener('dragover', (event) => {
+                event.preventDefault();
+            });
+
+            column.addEventListener('drop', (event) => {
+                event.preventDefault();
+                if (draggedTicket) {
+                    column.appendChild(draggedTicket);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
